@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Samsung & Transcom Quiz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     body { 
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -28,15 +29,29 @@
     #qr-container { display: block; text-align: center; }
     h1, h2, h3 { text-align: center; color: #1a73e8; margin-top: 0; }
     
-    .qr-image {
-        margin: 20px auto;
-        padding: 10px;
+    .quiz-world-text {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #1a73e8;
+        margin: 20px 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    #qrcode-box {
+        display: inline-block;
+        margin: 10px auto 20px auto;
+        padding: 15px;
         background: white;
-        border: 1px solid #ccc;
+        border: 2px dashed #1a73e8;
         border-radius: 8px;
         cursor: pointer;
-        max-width: 200px;
+        transition: transform 0.2s ease;
     }
+    #qrcode-box:hover {
+        transform: scale(1.05);
+    }
+    
     .lang-btn {
         display: block; width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.2em;
         background: #f8f9fa; color: #333; border: 2px solid #e0e0e0; cursor: pointer; border-radius: 8px;
@@ -110,7 +125,10 @@
 <div class="container" id="qr-container">
     <h1>Access Required</h1>
     <p>Please scan the QR code below with your mobile device to enter the quiz.</p>
-    <img id="qr-code-img" class="qr-image" alt="QR Code" onclick="simulateScan()">
+    
+    <div class="quiz-world-text">Take me to QUIZ world</div>
+    
+    <div id="qrcode-box" onclick="simulateScan()"></div>
     <p style="font-size: 0.8em; color: #777;">(For local testing: Click the QR code to simulate a scan)</p>
 </div>
 
@@ -167,4 +185,35 @@
             next: "Next",
             submit: "Submit Quiz",
             resultsTitle: "Quiz Results",
-            statsPoints: "Total
+            statsPoints: "Total Points: {0} / {1}",
+            statsCorrect: "Correct: {0}%",
+            statsWrong: "Wrong / Unanswered: {0}%",
+            viewAnswers: "View Correct Answers",
+            hideAnswers: "Hide Correct Answers",
+            yourAnswer: "Your Answer",
+            correctAnswer: "Correct Answer",
+            noAnswer: "Time out / No answer selected",
+            alreadyTaken: "You have already completed this quiz. Here are your previous results."
+        },
+        sv: {
+            title: "Quiz",
+            back: "Tillbaka",
+            next: "Nästa",
+            submit: "Skicka in Quiz",
+            resultsTitle: "Quiz-resultat",
+            statsPoints: "Totalt antal poäng: {0} / {1}",
+            statsCorrect: "Rätt: {0}%",
+            statsWrong: "Fel / Inget svar: {0}%",
+            viewAnswers: "Visa rätta svar",
+            hideAnswers: "Dölj rätta svar",
+            yourAnswer: "Ditt svar",
+            correctAnswer: "Rätt svar",
+            noAnswer: "Tiden gick ut / Inget svar valt",
+            alreadyTaken: "Du har redan genomfört detta quiz. Här är dina tidigare resultat."
+        }
+    };
+
+    const quizData = [
+        {
+            question: { en: "1. What does the word 'Samsung' mean in Korean?", sv: "1. Vad betyder ordet 'Samsung' på koreanska?" },
+            options: { en: ["Great Universe", "Shining Light", "
