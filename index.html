@@ -53,6 +53,22 @@
         transform: scale(1.05);
     }
     
+    .enter-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 24px;
+        font-size: 1.1em;
+        font-weight: bold;
+        background-color: #34a853;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-decoration: none;
+    }
+    .enter-btn:hover { background-color: #2c8c45; }
+
     .lang-btn {
         display: block; width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.2em;
         background: #f8f9fa; color: #333; border: 2px solid #e0e0e0; cursor: pointer; border-radius: 8px;
@@ -125,7 +141,12 @@
 
 <div class="container" id="qr-container">
     <div class="quiz-world-text">Take me to QUIZ world</div>
-    <img id="qrcode-box" onclick="simulateScan()" alt="Scan to enter quiz">
+    
+    <img id="qrcode-box" alt="Scan to enter quiz">
+    
+    <div>
+        <button class="enter-btn" onclick="simulateScan()">Or Click Here to Enter</button>
+    </div>
 </div>
 
 <div class="container" id="lang-container">
@@ -289,8 +310,8 @@
             const currentUrl = window.location.href.split('?')[0]; 
             const accessUrl = currentUrl + "?access=granted";
             
-            // Generate QR Code image url directly to the img tag
-            document.getElementById("qrcode-box").src = "https://quickchart.io/qr?size=200x200&text=" + encodeURIComponent(accessUrl);
+            // Generate QR Code image using Google Charts API (Incredibly robust against ad blockers)
+            document.getElementById("qrcode-box").src = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" + encodeURIComponent(accessUrl);
         }
     };
 
@@ -442,4 +463,34 @@
             const resultDiv = document.createElement('div');
             resultDiv.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
             
-            let userAnswerText = submittedAnswers[index] !== null ? q.options[lang][submittedAnswers[index]] : `<em>${uiText[lang].
+            let userAnswerText = submittedAnswers[index] !== null ? q.options[lang][submittedAnswers[index]] : `<em>${uiText[lang].noAnswer}</em>`;
+            let correctAnswerText = q.options[lang][q.answer];
+
+            resultDiv.innerHTML = `
+                <strong>${q.question[lang]}</strong><br>
+                ${uiText[lang].yourAnswer}: ${userAnswerText} <br>
+                ${!isCorrect ? `<strong>${uiText[lang].correctAnswer}:</strong> ${correctAnswerText}` : ''}
+            `;
+            reviewContainer.appendChild(resultDiv);
+        });
+
+        document.getElementById('result-container').style.display = 'block';
+    }
+
+    function toggleAnswers() {
+        const reviewContainer = document.getElementById('review-container');
+        const viewBtn = document.getElementById('ui-view-answers-btn');
+        
+        answersVisible = !answersVisible;
+        
+        if (answersVisible) {
+            reviewContainer.style.display = 'block';
+            viewBtn.innerText = uiText[currentLang].hideAnswers;
+        } else {
+            reviewContainer.style.display = 'none';
+            viewBtn.innerText = uiText[currentLang].viewAnswers;
+        }
+    }
+</script>
+</body>
+</html>
