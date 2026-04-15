@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samsung & Transcom Quiz</title>
+<style>
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background-color: #f0f2f5; 
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .container { 
+        background: white; 
+        width: 100%;
+        max-width: 650px; 
+        padding: 30px; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+        display: none; 
+        position: relative;
+    }
+    #qr-container { display: block; text-align: center; }
+    h1, h2, h3 { text-align: center; color: #1a73e8; margin-top: 0; }
+    
+    .qr-image {
+        margin: 20px auto;
+        padding: 10px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        max-width: 200px;
+    }
+    .lang-btn {
+        display: block; width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.2em;
+        background: #f8f9fa; color: #333; border: 2px solid #e0e0e0; cursor: pointer; border-radius: 8px;
+    }
+    .lang-btn:hover { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+    
+    /* Timer Styles */
+    .timer-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+    }
+    .retro-timer {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 2em;
+        font-weight: bold;
+        color: #333;
+        background: #f8f9fa;
+        padding: 5px 15px;
+        border: 2px solid #333;
+        border-radius: 5px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+    @keyframes panic-pulse {
+        0% { transform: scale(1); color: #e53935; text-shadow: 0 0 5px #e53935; border-color: #e53935; }
+        50% { transform: scale(1.05); color: #b71c1c; text-shadow: 0 0 15px #b71c1c; border-color: #b71c1c; }
+        100% { transform: scale(1); color: #e53935; text-shadow: 0 0 5px #e53935; border-color: #e53935; }
+    }
+    .time-low { animation: panic-pulse 0.5s infinite; color: #e53935; }
+
+    .question-title { font-size: 1.3em; font-weight: 600; margin-bottom: 20px; }
+    .options label { 
+        display: block; margin-bottom: 12px; cursor: pointer; padding: 15px; 
+        background: #f8f9fa; border-radius: 8px; border: 2px solid transparent; transition: all 0.2s ease;
+    }
+    .options label:hover { background: #e8f0fe; border-color: #d2e3fc; }
+    .options input[type="radio"] { margin-right: 15px; transform: scale(1.2); }
+    
+    .navigation-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+    button { 
+        padding: 12px 24px; font-size: 1em; font-weight: bold; cursor: pointer; 
+        border: none; border-radius: 6px; background: #1a73e8; color: white; transition: background 0.3s;
+    }
+    button:hover:not(:disabled) { background: #1557b0; }
+    button:disabled { background: #cccccc; cursor: not-allowed; }
+    
+    .stats-container {
+        display: flex; flex-wrap: wrap; justify-content: space-around;
+        background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;
+        font-size: 1.2em; font-weight: bold; text-align: center; gap: 10px;
+    }
+    .stat-points { width: 100%; color: #1a73e8; font-size: 1.4em; margin-bottom: 10px; }
+    .stat-correct { color: #155724; }
+    .stat-wrong { color: #721c24; }
+
+    #review-container { display: none; margin-top: 20px; }
+    .result-item { margin-bottom: 15px; padding: 15px; border-radius: 8px; }
+    .correct { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .incorrect { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    
+    .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; margin-bottom: 15px; overflow: hidden; }
+    .progress { height: 100%; background: #1a73e8; width: 0%; transition: width 0.3s ease; }
+    #already-taken-msg { color: #e53935; text-align: center; font-weight: bold; margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<div class="container" id="qr-container">
+    <h1>Access Required</h1>
+    <p>Please scan the QR code below with your mobile device to enter the quiz.</p>
+    <img id="qr-code-img" class="qr-image" alt="QR Code" onclick="simulateScan()">
+    <p style="font-size: 0.8em; color: #777;">(For local testing: Click the QR code to simulate a scan)</p>
+</div>
+
+<div class="container" id="lang-container">
+    <h1>Choose Your Language</h1>
+    <h2>Välj ditt språk</h2>
+    <div style="margin-top: 30px;">
+        <button class="lang-btn" onclick="startQuiz('en')">English</button>
+        <button class="lang-btn" onclick="startQuiz('sv')">Svenska</button>
+    </div>
+</div>
+
+<div class="container" id="quiz-container">
+    <div class="timer-container">
+        <h1 id="ui-quiz-title" style="margin: 0; text-align: left;">Samsung & Transcom Quiz</h1>
+        <div class="retro-timer" id="retro-timer">20</div>
+    </div>
+    
+    <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    
+    <div id="question-container">
+        <div class="question-title" id="question-text"></div>
+        <div class="options" id="options-container"></div>
+    </div>
+    <div class="navigation-buttons">
+        <button id="prev-btn" onclick="prevQuestion()" disabled>Back</button>
+        <button id="next-btn" onclick="nextQuestion()">Next</button>
+        <button id="submit-btn" onclick="processSubmission()" style="display:none;">Submit Quiz</button>
+    </div>
+</div>
+
+<div class="container" id="result-container">
+    <div id="already-taken-msg"></div>
+    <h1 id="ui-result-title" style="color: #333;">Quiz Results</h1>
+    
+    <div class="stats-container">
+        <div class="stat-points" id="stats-points"></div>
+        <div class="stat-correct" id="stats-correct"></div>
+        <div class="stat-wrong" id="stats-wrong"></div>
+    </div>
+
+    <div style="text-align: center;">
+        <button id="ui-view-answers-btn" onclick="toggleAnswers()">View Correct Answers</button>
+    </div>
+
+    <div id="review-container"></div>
+</div>
+
+<script>
+    const uiText = {
+        en: {
+            title: "Quiz",
+            back: "Back",
+            next: "Next",
+            submit: "Submit Quiz",
+            resultsTitle: "Quiz Results",
+            statsPoints: "Total
