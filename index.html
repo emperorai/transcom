@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Samsung & Transcom Quiz</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     body { 
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -30,23 +29,25 @@
     h1, h2, h3 { text-align: center; color: #1a73e8; margin-top: 0; }
     
     .quiz-world-text {
-        font-size: 1.5em;
+        font-size: 1.8em;
         font-weight: bold;
         color: #1a73e8;
-        margin: 20px 0 10px 0;
+        margin-bottom: 25px;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
     #qrcode-box {
-        display: inline-block;
-        margin: 10px auto 20px auto;
+        display: block;
+        margin: 0 auto;
         padding: 15px;
         background: white;
         border: 2px dashed #1a73e8;
         border-radius: 8px;
         cursor: pointer;
         transition: transform 0.2s ease;
+        width: 200px;
+        height: 200px;
     }
     #qrcode-box:hover {
         transform: scale(1.05);
@@ -123,13 +124,8 @@
 <body>
 
 <div class="container" id="qr-container">
-    <h1>Access Required</h1>
-    <p>Please scan the QR code below with your mobile device to enter the quiz.</p>
-    
     <div class="quiz-world-text">Take me to QUIZ world</div>
-    
-    <div id="qrcode-box" onclick="simulateScan()"></div>
-    <p style="font-size: 0.8em; color: #777;">(For local testing: Click the QR code to simulate a scan)</p>
+    <img id="qrcode-box" onclick="simulateScan()" alt="Scan to enter quiz">
 </div>
 
 <div class="container" id="lang-container">
@@ -216,4 +212,234 @@
     const quizData = [
         {
             question: { en: "1. What does the word 'Samsung' mean in Korean?", sv: "1. Vad betyder ordet 'Samsung' på koreanska?" },
-            options: { en: ["Great Universe", "Shining Light", "
+            options: { en: ["Great Universe", "Shining Light", "Three Stars", "Eastern Sun"], sv: ["Stort universum", "Skinande ljus", "Tre stjärnor", "Östlig sol"] },
+            answer: 2
+        },
+        {
+            question: { en: "2. What is the name of the virtual assistant introduced by Samsung with the release of the Galaxy S8?", sv: "2. Vad heter den virtuella assistenten som Samsung introducerade med Galaxy S8?" },
+            options: { en: ["Bellnixby", "Cortana", "Siri", "Bixby"], sv: ["Bellnixby", "Cortana", "Siri", "Bixby"] },
+            answer: 3
+        },
+        {
+            question: { en: "3. In which year was Samsung Electronics established?", sv: "3. Vilket år grundades Samsung Electronics?" },
+            options: { en: ["1938", "1969", "1983", "1995"], sv: ["1938", "1969", "1983", "1995"] },
+            answer: 1
+        },
+        {
+            question: { en: "4. What was the first electronic product ever produced by Samsung Electronics?", sv: "4. Vilken var den första elektroniska produkten som Samsung Electronics någonsin tillverkade?" },
+            options: { en: ["A rotary telephone", "A washing machine", "A transistor radio", "A black-and-white television"], sv: ["En snurrtelefon", "En tvättmaskin", "En transistorradio", "En svartvit tv"] },
+            answer: 3
+        },
+        {
+            question: { en: "5. Which famous line of smartphones is Samsung Electronics best known for?", sv: "5. Vilken känd serie av smartphones är Samsung Electronics mest känd för?" },
+            options: { en: ["Book series", "Galaxy series", "Lumia", "Pixel"], sv: ["Bok-serien", "Galaxy-serien", "Lumia", "Pixel"] },
+            answer: 1
+        },
+        {
+            question: { en: "6. In what year was Transcom founded?", sv: "6. Vilket år grundades Transcom?" },
+            options: { en: ["1985", "1995", "2005", "2015"], sv: ["1985", "1995", "2005", "2015"] },
+            answer: 1
+        },
+        {
+            question: { en: "7. What is Transcom's primary industry?", sv: "7. Vilken är Transcoms huvudsakliga bransch?" },
+            options: { en: ["Artificial Intelligence", "Software Development", "Customer Service and Business Process Outsourcing (BPO)", "IT Consultancy"], sv: ["Artificiell intelligens", "Mjukvaruutveckling", "Kundtjänst och Business Process Outsourcing (BPO)", "IT-konsulttjänster"] },
+            answer: 2
+        },
+        {
+            question: { en: "8. When did Transcom move to a new office in Kista?", sv: "8. När flyttade Transcom till ett nytt kontor i Kista?" },
+            options: { en: ["February 2025", "January 2025", "April 2024", "March 2025"], sv: ["Februari 2025", "Januari 2025", "April 2024", "Mars 2025"] },
+            answer: 3
+        },
+        {
+            question: { en: "9. Where is the primary global headquarters, often referred to as 'Samsung Digital City', located?", sv: "9. Var ligger det primära globala huvudkontoret, ofta kallat 'Samsung Digital City'?" },
+            options: { en: ["Seoul, South Korea", "Tokyo, Japan", "Suwon, South Korea", "Taipei, Taiwan"], sv: ["Seoul, Sydkorea", "Tokyo, Japan", "Suwon, Sydkorea", "Taipei, Taiwan"] },
+            answer: 2
+        },
+        {
+            question: { en: "10. When did Transcom took over Samsung project?", sv: "10. När tog Transcom över Samsung-projektet?" },
+            options: { en: ["2024", "2025", "2023", "2022"], sv: ["2024", "2025", "2023", "2022"] },
+            answer: 0
+        }
+    ];
+
+    let currentLang = 'en';
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+    let answersVisible = false;
+    
+    let timerInterval;
+    let timeLeft = 20;
+
+    window.onload = function() {
+        if (localStorage.getItem('quizCompleted') === 'true') {
+            const savedLang = localStorage.getItem('quizLang') || 'en';
+            const savedCorrect = parseInt(localStorage.getItem('quizCorrectCount'));
+            const savedAnswers = JSON.parse(localStorage.getItem('quizAnswers'));
+            showResults(savedCorrect, savedAnswers, savedLang, true);
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasAccess = urlParams.get('access') === 'granted';
+
+        if (hasAccess) {
+            document.getElementById('qr-container').style.display = 'none';
+            document.getElementById('lang-container').style.display = 'block';
+        } else {
+            const currentUrl = window.location.href.split('?')[0]; 
+            const accessUrl = currentUrl + "?access=granted";
+            
+            // Generate QR Code image url directly to the img tag
+            document.getElementById("qrcode-box").src = "https://quickchart.io/qr?size=200x200&text=" + encodeURIComponent(accessUrl);
+        }
+    };
+
+    function simulateScan() {
+        const currentUrl = window.location.href.split('?')[0];
+        window.location.href = currentUrl + "?access=granted";
+    }
+
+    function startQuiz(lang) {
+        currentLang = lang;
+        document.getElementById('lang-container').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+        
+        document.getElementById('ui-quiz-title').innerText = uiText[lang].title;
+        document.getElementById('prev-btn').innerText = uiText[lang].back;
+        document.getElementById('next-btn').innerText = uiText[lang].next;
+        document.getElementById('submit-btn').innerText = uiText[lang].submit;
+        
+        loadQuestion();
+    }
+
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const progressBar = document.getElementById('progress');
+    const timerElement = document.getElementById('retro-timer');
+
+    function updateProgress() {
+        const percentage = ((currentQuestion + 1) / quizData.length) * 100;
+        progressBar.style.width = `${percentage}%`;
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval); 
+        timeLeft = 20; 
+        
+        timerElement.innerText = timeLeft;
+        timerElement.classList.remove('time-low');
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.innerText = timeLeft;
+
+            if (timeLeft <= 5) {
+                timerElement.classList.add('time-low');
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                autoAdvance();
+            }
+        }, 1000);
+    }
+
+    function autoAdvance() {
+        if (currentQuestion < quizData.length - 1) {
+            currentQuestion++;
+            loadQuestion();
+        } else {
+            processSubmission(); 
+        }
+    }
+
+    function loadQuestion() {
+        const currentQuizData = quizData[currentQuestion];
+        questionText.innerText = currentQuizData.question[currentLang];
+        optionsContainer.innerHTML = '';
+
+        currentQuizData.options[currentLang].forEach((option, index) => {
+            const label = document.createElement('label');
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'answer';
+            radio.value = index;
+            
+            if (userAnswers[currentQuestion] === index) radio.checked = true;
+            
+            radio.addEventListener('change', () => { userAnswers[currentQuestion] = index; });
+            
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(option));
+            optionsContainer.appendChild(label);
+        });
+
+        prevBtn.disabled = currentQuestion === 0;
+        
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'block';
+            submitBtn.style.display = 'none';
+        }
+        
+        updateProgress();
+        startTimer(); 
+    }
+
+    function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; loadQuestion(); } }
+    function nextQuestion() { if (currentQuestion < quizData.length - 1) { currentQuestion++; loadQuestion(); } }
+
+    function processSubmission() {
+        clearInterval(timerInterval); 
+        
+        let correctCount = 0;
+        quizData.forEach((q, index) => {
+            if (userAnswers[index] === q.answer) correctCount++;
+        });
+
+        localStorage.setItem('quizCompleted', 'true');
+        localStorage.setItem('quizCorrectCount', correctCount);
+        localStorage.setItem('quizAnswers', JSON.stringify(userAnswers));
+        localStorage.setItem('quizLang', currentLang);
+
+        showResults(correctCount, userAnswers, currentLang, false);
+    }
+
+    function showResults(correctCount, submittedAnswers, lang, isAlreadyTaken) {
+        currentLang = lang;
+        
+        document.getElementById('qr-container').style.display = 'none';
+        document.getElementById('lang-container').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'none';
+        
+        if (isAlreadyTaken) {
+            document.getElementById('already-taken-msg').innerText = uiText[lang].alreadyTaken;
+        }
+
+        document.getElementById('ui-result-title').innerText = uiText[lang].resultsTitle;
+        
+        const totalPoints = correctCount * 2;
+        const maxPoints = quizData.length * 2;
+
+        const pctCorrect = Math.round((correctCount / quizData.length) * 100);
+        const pctWrong = 100 - pctCorrect;
+        
+        document.getElementById('stats-points').innerText = uiText[lang].statsPoints.replace('{0}', totalPoints).replace('{1}', maxPoints);
+        document.getElementById('stats-correct').innerText = uiText[lang].statsCorrect.replace('{0}', pctCorrect);
+        document.getElementById('stats-wrong').innerText = uiText[lang].statsWrong.replace('{0}', pctWrong);
+
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+        document.getElementById('ui-view-answers-btn').innerText = uiText[lang].viewAnswers;
+
+        quizData.forEach((q, index) => {
+            const isCorrect = submittedAnswers[index] === q.answer;
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            let userAnswerText = submittedAnswers[index] !== null ? q.options[lang][submittedAnswers[index]] : `<em>${uiText[lang].
